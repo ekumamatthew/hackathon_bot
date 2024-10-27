@@ -1,5 +1,8 @@
+import asyncio
+
 from django.core.management import BaseCommand
 
+from tracker.bot import BOT, dispatcher
 from tracker.models import Repository
 from tracker.utils import get_deprecated_issue_assignees
 from tracker.values import ISSUES_URL, PULLS_URL
@@ -39,24 +42,33 @@ class Command(BaseCommand):
 
         all_repositories = Repository.objects.all()
 
-        for repository in all_repositories:
-            deprecated_issue_assignees = get_deprecated_issue_assignees(
-                issues_url=ISSUES_URL.format(
-                    owner=repository.author, repo=repository.name
-                ),
-                pulls_url=PULLS_URL.format(
-                    owner=repository.author, repo=repository.name
-                ),
-            )
-            self.stdout.write("=" * 50)
-            self.stdout.write(f"Repository: {repository.author}/{repository.name}")
-            self.stdout.write("=" * 50, ending="\n")
+        async def start_bot():
+            await dispatcher.start_polling(BOT.bot)
 
-            for issue in deprecated_issue_assignees:
-                self.stdout.write("-" * 35)
-                self.stdout.write("Issue: " + issue["title"])
-                self.stdout.write("User: " + issue["user"])
-                self.stdout.write("Issue lifetime:")
-                self.stdout.write("    Days: " + str(issue["days"]))
-                self.stdout.write("    Hours: " + str(issue["hours"]))
-                self.stdout.write("-" * 35, ending="\n" * 3)
+            for repository in all_repositories:
+                deprecated_issue_assignees = get_deprecated_issue_assignees(
+                    issues_url=ISSUES_URL.format(
+                        owner=repository.author, repo=repository.name
+                    ),
+                    pulls_url=PULLS_URL.format(
+                        owner=repository.author, repo=repository.name
+                    ),
+                )
+                message_header = f"{'=' * 50}\nRepository: {repository.author}/{repository.name}\n{'=' * 50}\n"
+                await BOT.bot.send(message_header)
+
+                for issue in deprecated_issue_assignees:
+                    message = (
+                        f"{'-' * 35}"
+                        f"Issue: {issue['title']}\n"
+                        f"User: {issue['user']}\n"
+                        f"Issue lifetime:\n"
+                        f"    Days: {issue['days']}\n"
+                        f"    Hours: {issue['hours']}\n"
+                        f"{'-' * 35}"
+                    )
+                    await BOT.bot.send(message)
+
+            await BOT.bot.close()
+
+        asyncio.run(start_bot())
