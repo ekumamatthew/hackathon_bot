@@ -134,5 +134,4 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 GITHUB_AUTH_TOKEN = os.environ.get("GITHUB_AUTH_TOKEN")
-TELEGRAM_AUTH_TOKEN = os.environ.get("TELEGRAM_AUTH_TOKEN")
-TELEGRAM_CHAT_ID = int(os.environ.get("CHAT_ID"))
+TELEGRAM_AUTH_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
