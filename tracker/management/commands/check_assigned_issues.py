@@ -55,7 +55,9 @@ class Command(BaseCommand):
             for issue in deprecated_issue_assignees:
                 self.stdout.write("-" * 35)
                 self.stdout.write("Issue: " + issue.get("title", str()))
-                self.stdout.write("User: " + issue.get("assignee", dict()).get("login", str()))
+                self.stdout.write(
+                    "User: " + issue.get("assignee", dict()).get("login", str())
+                )
                 self.stdout.write("Issue lifetime:")
                 self.stdout.write("    Days: " + str(issue["days"]))
                 self.stdout.write("-" * 35, ending="\n" * 3)
