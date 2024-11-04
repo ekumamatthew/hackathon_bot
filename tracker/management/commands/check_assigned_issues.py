@@ -1,7 +1,7 @@
 from django.core.management import BaseCommand
 
 from tracker.models import Repository
-from tracker.utils import get_deprecated_issue_assignees
+from tracker.utils import get_issues_without_pull_requests
 from tracker.values import ISSUES_URL, PULLS_URL
 
 
@@ -40,11 +40,11 @@ class Command(BaseCommand):
         all_repositories = Repository.objects.all()
 
         for repository in all_repositories:
-            deprecated_issue_assignees = get_deprecated_issue_assignees(
+            deprecated_issue_assignees = get_issues_without_pull_requests(
                 issues_url=ISSUES_URL.format(
                     owner=repository.author, repo=repository.name
                 ),
-                pulls_url=PULLS_URL.format(
+                pull_requests_url=PULLS_URL.format(
                     owner=repository.author, repo=repository.name
                 ),
             )
@@ -54,9 +54,8 @@ class Command(BaseCommand):
 
             for issue in deprecated_issue_assignees:
                 self.stdout.write("-" * 35)
-                self.stdout.write("Issue: " + issue["title"])
-                self.stdout.write("User: " + issue["user"])
+                self.stdout.write("Issue: " + issue.get("title", str()))
+                self.stdout.write("User: " + issue.get("assignee", dict()).get("login", str()))
                 self.stdout.write("Issue lifetime:")
                 self.stdout.write("    Days: " + str(issue["days"]))
-                self.stdout.write("    Hours: " + str(issue["hours"]))
                 self.stdout.write("-" * 35, ending="\n" * 3)

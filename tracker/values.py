@@ -1,13 +1,16 @@
+import os
 from dataclasses import dataclass
 
-from django.conf import settings
+from dotenv import load_dotenv
+
+load_dotenv()
 
 ISSUES_URL = "https://api.github.com/repos/{owner}/{repo}/issues"
 PULLS_URL = "https://api.github.com/repos/{owner}/{repo}/pulls"
 
 HEADERS = {
     "Accept": "application/vnd.github+json",
-    "Authorization": f"Bearer {settings.GITHUB_AUTH_TOKEN}",
+    "Authorization": f"Bearer {os.environ.get("GITHUB_AUTH_TOKEN", "")}",
     "X-GitHub-Api-Version": "2022-11-28",
 }
 
