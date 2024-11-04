@@ -8,13 +8,13 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.11"
 Django = "^5.1.2"
-celery = "^5.4.0"
-redis = "^5.2.0"
 aiogram = "^3.13.1"
 psycopg2-binary = "^2.9.10"
 python-dotenv = "^1.0.1"
 black = "^24.10.0"
 isort = "^5.13.2"
+requests = "^2.32.3"
+python-dateutil = "^2.9.0.post0"
 
 
 [build-system]

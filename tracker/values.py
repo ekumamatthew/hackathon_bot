@@ -1,5 +1,14 @@
 from dataclasses import dataclass
 
+ISSUES_URL = "https://api.github.com/repos/{owner}/{repo}/issues"
+PULLS_URL = "https://api.github.com/repos/{owner}/{repo}/pulls"
+
+HEADERS = {
+    "Accept": "application/vnd.github+json",
+    "Authorization": "Bearer {token}",
+    "X-GitHub-Api-Version": "2022-11-28",
+}
+
 
 @dataclass(frozen=True)
 class DefaultModelValues:
