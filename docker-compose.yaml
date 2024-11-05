@@ -25,6 +25,7 @@ services:
     restart: always
     volumes:
       - .:/app
+      - static_volume:/app/static/
     env_file:
       - .env
     expose:
@@ -43,9 +44,12 @@ services:
       dockerfile: ./Dockerfile
     depends_on:
       - backend
+    volumes:
+      - static_volume:/static/
     networks:
       - app_network
 
 
 volumes:
   db_data:
+  static_volume:
