@@ -60,7 +60,7 @@ ROOT_URLCONF = "core.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -133,6 +133,9 @@ STATIC_ROOT = BASE_DIR / "static"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+AUTH_USER_MODEL = "tracker.CustomUser"
+LOGOUT_REDIRECT_URL = "/"
 
 GITHUB_AUTH_TOKEN = os.environ.get("GITHUB_AUTH_TOKEN")
 TELEGRAM_AUTH_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")

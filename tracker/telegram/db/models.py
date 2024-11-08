@@ -28,6 +28,7 @@ class Repository(Base):
     Methods:
         __str__() -> str: Returns a string representation of the repository in the format 'author/name'.
     """
+
     __tablename__ = "tracker_repository"
 
     name = Column(String, index=True, nullable=False, unique=True)
