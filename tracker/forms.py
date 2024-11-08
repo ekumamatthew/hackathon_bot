@@ -26,13 +26,9 @@ class SignUpForm(forms.ModelForm):
             Validates the form data ensuring that the password and confirm_password are identical.
     """
 
-    email = forms.EmailField(widget=forms.EmailInput(attrs={"class": "form-control"}))
-    password = forms.CharField(
-        widget=forms.PasswordInput(attrs={"class": "form-control"})
-    )
-    confirm_password = forms.CharField(
-        widget=forms.PasswordInput(attrs={"class": "form-control"})
-    )
+    email = forms.EmailField()
+    password = forms.CharField(widget=forms.PasswordInput())
+    confirm_password = forms.CharField(widget=forms.PasswordInput())
 
     class Meta:
         model = CustomUser
