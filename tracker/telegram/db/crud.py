@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
-
+from uuid import UUID
 from .database import SQLALCHEMY_DATABASE_URL
 from .models import Base, Repository
 
@@ -36,3 +36,9 @@ class DBConnector:
 
         finally:
             db.close()
+
+    def get_tracked_repositories(
+        self, uuid: UUID, model: Base = Repository
+    ) -> list[Base]:
+        db = self.Session()
+        return db.query(model).filter(model.id == uuid).all()

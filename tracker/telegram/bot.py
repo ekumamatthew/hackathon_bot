@@ -5,11 +5,13 @@ import sys
 
 from aiogram import Bot, Dispatcher, F
 from aiogram.client.default import DefaultBotProperties
-from aiogram.filters import CommandStart
+from aiogram.filters import CommandStart, CommandObject
 from aiogram.types.message import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, ReplyKeyboardMarkup
+from aiogram.utils.deep_linking import create_start_link, decode_payload
 from dotenv import load_dotenv
 
+from tracker.telegram.db.models import Repository
 from tracker import ISSUES_URL, PULLS_URL, get_issues_without_pull_requests
 from tracker.telegram.db.crud import DBConnector
 
@@ -25,6 +27,19 @@ bot = Bot(
 )
 dp = Dispatcher()
 DB = DBConnector()
+
+
+@dp.message(CommandStart(deep_link=True, deep_link_encoded=True))
+async def auth_link_handler(msg: Message, command: CommandObject) -> None:
+    """
+    deep link handler saving the uuid and tracked repos by this user into db
+    :param msg: aiogram.types.Message object
+    :param command: aiogram.filters.CommandObject object
+    :return: None
+    """
+    uuid = command.args
+    tracked_repos = DB.get_tracked_repositories(uuid)
+    # probably need to write uuid and tracked repos to db here
 
 
 @dp.message(CommandStart())
@@ -48,8 +63,8 @@ async def send_deprecated_issue_assignees(msg: Message) -> None:
     :param msg: Message instance for communication with a user
     :return: None
     """
-    all_pull_requests = DB.get_all_repositories()
 
+    all_pull_requests = DB.get_all_repositories()
     for repository in all_pull_requests:
         issues = get_issues_without_pull_requests(
             issues_url=ISSUES_URL.format(owner=repository.author, repo=repository.name),
@@ -92,6 +107,10 @@ def issue_button() -> ReplyKeyboardMarkup:
     builder.button(text="📓get missed deadlines📓")
 
     return builder.as_markup(resize_keyboard=True)
+
+
+async def create_tg_link(uuid) -> str:
+    return await create_start_link(bot=bot, payload=uuid, encode=True)
 
 
 async def start_tg_bot() -> None:
