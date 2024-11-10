@@ -51,7 +51,8 @@ def create_telegram_user(user: object, telegram_id: str) -> None:
     """
     from .models import TelegramUser
 
-    TelegramUser.objects.create(user=user, telegram_id=telegram_id)
+    if not TelegramUser.objects.filter(telegram_id=telegram_id, user=user).exists():
+        TelegramUser.objects.create(user=user, telegram_id=telegram_id)
 
 
 def check_issue_assignment_events(issue: dict) -> dict:
