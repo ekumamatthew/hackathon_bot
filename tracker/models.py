@@ -128,11 +128,9 @@ class Repository(AbstractModel):
     """
 
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    name = models.CharField(unique=True, max_length=DefaultModelValues.name_max_length)
-    author = models.CharField(
-        unique=True, max_length=DefaultModelValues.author_max_length
-    )
-    link = models.URLField(unique=True, max_length=DefaultModelValues.link_max_length)
+    name = models.CharField(max_length=DefaultModelValues.name_max_length)
+    author = models.CharField(max_length=DefaultModelValues.author_max_length)
+    link = models.URLField(max_length=DefaultModelValues.link_max_length)
 
     class Meta:
         verbose_name_plural = "Repositories"
@@ -166,3 +164,26 @@ class Repository(AbstractModel):
         :return: str
         """
         return f"{self.author}/{self.name}"
+
+
+class TelegramUser(AbstractModel):
+    """
+    Represents a Telegram user associated with a custom user in the system.
+
+    Attributes:
+        user (CustomUser): A one-to-one relationship with the CustomUser model.
+        telegram_id (str): A unique identifier for the user on Telegram.
+
+    Methods:
+    - __str__: Returns a string representation of the telegram user.
+    """
+
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    telegram_id = models.CharField(unique=True)
+
+    def __str__(self) -> str:
+        """
+        Returns a string representation of the TelegramUser instance.
+        :return: str
+        """
+        return f"{self.user}: {self.telegram_id}"
