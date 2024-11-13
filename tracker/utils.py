@@ -2,12 +2,57 @@ import logging
 from datetime import datetime
 
 import requests
+from asgiref.sync import sync_to_async
 from dateutil.relativedelta import relativedelta
 
-from tracker.values import HEADERS
+from .values import HEADERS
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
+
+
+@sync_to_async
+def get_all_repostitories(tele_id: str) -> list[dict]:
+    """
+    A function that returns a list of repositories asyncronously.
+    :param tele_id: str
+    :return: Repositories
+    """
+    from .models import TelegramUser
+
+    repositories = TelegramUser.objects.get(
+        telegram_id=tele_id
+    ).user.repository_set.values()
+
+    return list(repositories)
+
+
+@sync_to_async
+def get_user(uuid: str) -> tuple["CustomUser"]:
+    """
+    Retunrs an user instantce
+    :param uuid: str
+    :return: tuple(CustomUser, )
+    """
+    from .models import CustomUser
+
+    user = CustomUser.objects.get(id=uuid)
+
+    return (user,)
+
+
+@sync_to_async
+def create_telegram_user(user: object, telegram_id: str) -> None:
+    """
+    Creates a new TelegramUser object
+    :param user: CustomUser object
+    :param telegram_id: telegram id
+    :return: None
+    """
+    from .models import TelegramUser
+
+    if not TelegramUser.objects.filter(telegram_id=telegram_id, user=user).exists():
+        TelegramUser.objects.create(user=user, telegram_id=telegram_id)
 
 
 def check_issue_assignment_events(issue: dict) -> dict:
@@ -33,7 +78,9 @@ def check_issue_assignment_events(issue: dict) -> dict:
 
             for event in events:
                 if event.get("event") == "assigned":
-                    assignment_info["assignee"] = event.get("assignee", dict()).get("login", str())
+                    assignment_info["assignee"] = event.get("assignee", dict()).get(
+                        "login", str()
+                    )
                     assignment_info["assigned_at"] = event.get("created_at", str())
 
             return assignment_info
@@ -109,10 +156,14 @@ def get_issues_without_pull_requests(
         issue["assignment_info"] = check_issue_assignment_events(issue)
         assigned_at = issue.get("assignment_info", dict()).get("assigned_at")
 
-        time_delta = relativedelta(
-            dt1=datetime.now(),
-            dt2=datetime.strptime(assigned_at, "%Y-%m-%dT%H:%M:%SZ"),
-        ) if assigned_at else str()
+        time_delta = (
+            relativedelta(
+                dt1=datetime.now(),
+                dt2=datetime.strptime(assigned_at, "%Y-%m-%dT%H:%M:%SZ"),
+            )
+            if assigned_at
+            else str()
+        )
 
         issue["days"] = time_delta.days if time_delta else 0
 
@@ -127,7 +178,10 @@ def get_issues_without_pull_requests(
     result = list()
 
     for issue in issues.copy():
-        if issue.get("days", 0) >= 1 and issue.get("assignee", dict()).get("login") not in pull_requests_users:
+        if (
+            issue.get("days", 0) >= 1
+            and issue.get("assignee", dict()).get("login") not in pull_requests_users
+        ):
             result.append(issue)
 
     return result
