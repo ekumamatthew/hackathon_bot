@@ -12,7 +12,12 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder, ReplyKeyboardMarkup
 from dotenv import load_dotenv
 
 from tracker import ISSUES_URL, PULLS_URL, get_issues_without_pull_requests
-from tracker.utils import create_telegram_user, get_all_repostitories, get_user
+from tracker.utils import (
+    create_telegram_user,
+    get_all_repostitories,
+    get_user,
+    get_all_available_issues,
+)
 
 load_dotenv()
 
@@ -44,7 +49,7 @@ async def auth_link_handler(message: Message, command: CommandObject) -> None:
     await message.answer(
         f"Hello {message.from_user.mention_html()}!\n"
         f"Would you like to check some issues?",
-        reply_markup=issue_button(),
+        reply_markup=main_button_markup(),
     )
 
 
@@ -58,7 +63,7 @@ async def start_message(message: Message) -> None:
     await message.answer(
         f"Hello {message.from_user.mention_html()}!\n"
         f"Would you like to check some issues?",
-        reply_markup=issue_button(),
+        reply_markup=main_button_markup(),
     )
 
 
@@ -108,13 +113,53 @@ async def send_deprecated_issue_assignees(msg: Message) -> None:
         await msg.answer(f"<blockquote>{message}</blockquote>")
 
 
-def issue_button() -> ReplyKeyboardMarkup:
+@dp.message(F.text == "📖get available issues📖")
+async def send_available_issues(msg: Message) -> None:
     """
-    A function that generates a button that allows the user to click on issues.
+    Sends all the available issues
+    :param msg: Message instance for communication with a user
+    :return: None
+    """
+    all_repositories = await get_all_repostitories(msg.from_user.id)
+
+    for repository in all_repositories:
+        issues = get_all_available_issues(
+            ISSUES_URL.format(
+                owner=repository.get("author", str()),
+                repo=repository.get("name", str()),
+            ),
+        )
+
+        message = (
+            "=" * 50
+            + "\n"
+            + f"Repository: {repository.get("author", str())}/{repository.get("name", str())}"
+            + "\n"
+            + "=" * 50
+            + "\n\n"
+        )
+
+        for issue in issues:
+            message += (
+                "-----------------------------------\n"
+                "Issue: " + issue.get("title", str()) + "\n"
+                "-----------------------------------\n"
+            )
+
+        if not issues:
+            message += "No available issues."
+
+        await msg.answer(f"<blockquote>{message}</blockquote>")
+
+
+def main_button_markup() -> ReplyKeyboardMarkup:
+    """
+    A function that generates a button
     :return: ReplyKeyboardMarkup
     """
     builder = ReplyKeyboardBuilder()
     builder.button(text="📓get missed deadlines📓")
+    builder.button(text="📖get available issues📖")
 
     return builder.as_markup(resize_keyboard=True)
 
