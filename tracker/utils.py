@@ -185,3 +185,33 @@ def get_issues_without_pull_requests(
             result.append(issue)
 
     return result
+
+
+def get_all_available_issues(url: str) -> list[dict]:
+    """
+    Retrieves all available issues from a given URL.
+    :param url: The API endpoint for issues.
+    :return: A list of dictionaries representing available issues.
+    """
+    try:
+        response = requests.get(url, headers=HEADERS)
+        response.raise_for_status()
+
+        if response.ok:
+            issues = response.json()
+
+            available_issues = list(
+                filter(
+                    lambda issue: issue.get("state") == "open"
+                    and not issue.get("assignee")
+                    and not issue.get("draft")
+                    and not issue.get("pull_request"),
+                    issues,
+                )
+            )
+            logger.info(available_issues)
+            return available_issues
+
+    except requests.exceptions.RequestException as e:
+        logger.info(e)
+    return []
