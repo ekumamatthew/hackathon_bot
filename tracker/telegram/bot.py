@@ -91,7 +91,7 @@ async def send_deprecated_issue_assignees(msg: Message) -> None:
         message = (
             "=" * 50
             + "\n"
-            + f"Repository: {repository.get("author", str())}/{repository.get("name", str())}"
+            + f"<b>Repository: {repository.get("author", str())}/{repository.get("name", str())}</b>"
             + "\n"
             + "=" * 50
             + "\n\n"
@@ -108,9 +108,9 @@ async def send_deprecated_issue_assignees(msg: Message) -> None:
             )
 
         if not issues:
-            message += "No missed deadlines."
+            message += "No missed deadlines.\n"
 
-        await msg.answer(f"<blockquote>{message}</blockquote>")
+        await msg.reply(f"<blockquote>{message}</blockquote>")
 
 
 @dp.message(F.text == "📖get available issues📖")
@@ -133,7 +133,7 @@ async def send_available_issues(msg: Message) -> None:
         message = (
             "=" * 50
             + "\n"
-            + f"Repository: {repository.get("author", str())}/{repository.get("name", str())}"
+            + f"<b>Repository: {repository.get("author", str())}/{repository.get("name", str())}</b>"
             + "\n"
             + "=" * 50
             + "\n\n"
@@ -147,9 +147,9 @@ async def send_available_issues(msg: Message) -> None:
             )
 
         if not issues:
-            message += "No available issues."
+            message += "No available issues.\n"
 
-        await msg.answer(f"<blockquote>{message}</blockquote>")
+        await msg.reply(f"<blockquote>{message}</blockquote>")
 
 
 def main_button_markup() -> ReplyKeyboardMarkup:
