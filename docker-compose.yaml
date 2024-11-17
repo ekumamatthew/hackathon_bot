@@ -47,9 +47,20 @@ services:
       - backend
     volumes:
       - static_volume:/static/
+      - ./nginx/conf.d/:/etc/nginx/conf.d/
+      - /var/certbot/conf:/etc/letsencrypt/:ro
     networks:
       - app_network
 
+  certbot:
+    image: certbot/certbot:latest
+    volumes:
+      - /var/certbot/conf:/etc/letsencrypt/:rw
+      - /var/certbot/www/:/var/www/certbot/:rw
+    depends_on:
+      - nginx
+    networks:
+      - app_network
 
 volumes:
   db_data:
