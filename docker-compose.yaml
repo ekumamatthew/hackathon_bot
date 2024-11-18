@@ -47,24 +47,10 @@ services:
       - backend
     volumes:
       - static_volume:/static/
-      - ./nginx/conf.d/:/etc/nginx/conf.d/
-      - certbot_volume:/etc/letsencrypt/
-      - certbot_volume:/var/www/certbot/
-    networks:
-      - app_network
-
-  certbot:
-    image: certbot/certbot:latest
-    volumes:
-      - certbot_volume:/etc/letsencrypt/
-      - certbot_volume:/var/www/certbot/
-    command: certonly --webroot -w /var/www/certbot --force-renewal --email ${SSL_EMAIL} -d ${DOMAIN} --agree-tos
-    depends_on:
-      - nginx
+      - ./nginx/:/etc/nginx/conf.d/
     networks:
       - app_network
 
 volumes:
   db_data:
   static_volume:
-  certbot_volume:
