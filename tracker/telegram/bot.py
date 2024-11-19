@@ -91,7 +91,7 @@ async def send_deprecated_issue_assignees(msg: Message) -> None:
         message = (
             "=" * 50
             + "\n"
-            + f"<b>Repository: {repository.get("author", str())}/{repository.get("name", str())}</b>"
+            + f'<b>Repository: {repository.get("author", str())}/{repository.get("name", str())}</b>'
             + "\n"
             + "=" * 50
             + "\n\n"
@@ -111,6 +111,17 @@ async def send_deprecated_issue_assignees(msg: Message) -> None:
             message += "No missed deadlines.\n"
 
         await msg.reply(f"<blockquote>{message}</blockquote>")
+
+
+def escape_html(text: str) -> str:
+    """
+    Escapes HTML symbols in the text to ensure proper rendering in Telegram messages.
+    """
+    return (
+        text.replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+    )
 
 
 @dp.message(F.text == "📖get available issues📖")
@@ -133,23 +144,28 @@ async def send_available_issues(msg: Message) -> None:
         message = (
             "=" * 50
             + "\n"
-            + f"<b>Repository: {repository.get("author", str())}/{repository.get("name", str())}</b>"
+            + f'<b>Repository: {repository.get("author", str())}/{repository.get("name", str())}</b>'
             + "\n"
             + "=" * 50
             + "\n\n"
         )
 
         for issue in issues:
+            description = issue.get("body", "No description provided.")
+            escaped_description = escape_html(description)
+
             message += (
                 "-----------------------------------\n"
-                "Issue: " + issue.get("title", str()) + "\n"
+                f"Issue #{issue.get('number', 'Unknown')}: {issue.get('title', 'No title provided')}\n"
+                f"User: {issue.get('user', {}).get('login', 'Unknown')}\n"
+                f"Description: <blockquote expandable>{escaped_description}</blockquote>\n"
                 "-----------------------------------\n"
             )
 
         if not issues:
             message += "No available issues.\n"
 
-        await msg.reply(f"<blockquote>{message}</blockquote>")
+        await msg.reply(message, parse_mode="HTML")
 
 
 def main_button_markup() -> ReplyKeyboardMarkup:
