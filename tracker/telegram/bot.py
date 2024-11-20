@@ -116,6 +116,10 @@ async def send_deprecated_issue_assignees(msg: Message) -> None:
 def escape_html(text: str) -> str:
     """
     Escapes HTML symbols in the text to ensure proper rendering in Telegram messages.
+
+    :param text: The input string that may contain HTML symbols.
+    :return: A string with HTML symbols escaped, replacing '&' with '&amp;', '<' with '&lt;',
+             and '>' with '&gt;'.
     """
     return (
         text.replace("&", "&amp;")
