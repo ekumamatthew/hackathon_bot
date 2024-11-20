@@ -161,7 +161,7 @@ async def send_available_issues(msg: Message) -> None:
             message += (
                 "-----------------------------------\n"
                 f"Issue #{issue.get('number', 'Unknown')}: {issue.get('title', 'No title provided')}\n"
-                f"User: {issue.get('user', {}).get('login', 'Unknown')}\n"
+                f"Author: {issue.get('user', {}).get('login', 'Unknown')}\n"
                 f"Description: <blockquote expandable>{escaped_description}</blockquote>\n"
                 "-----------------------------------\n"
             )
