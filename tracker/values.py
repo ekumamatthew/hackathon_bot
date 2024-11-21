@@ -7,6 +7,9 @@ load_dotenv()
 
 ISSUES_URL = "https://api.github.com/repos/{owner}/{repo}/issues"
 PULLS_URL = "https://api.github.com/repos/{owner}/{repo}/pulls"
+PULLS_REVIEWS_URL = (
+    "https://api.github.com/repos/{owner}/{repo}/pulls/{pull_number}/reviews"
+)
 
 HEADERS = {
     "Accept": "application/vnd.github+json",
