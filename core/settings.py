@@ -45,13 +45,10 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-
     # third party apps
-    'django_celery_beat',
-
+    "django_celery_beat",
     # custom apps
     "tracker",
-
 ]
 
 MIDDLEWARE = [
@@ -150,10 +147,14 @@ GITHUB_AUTH_TOKEN = os.environ.get("GITHUB_AUTH_TOKEN")
 TELEGRAM_AUTH_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 
 
-# celery settings
+# Celery settings
 
 CELERY_BROKER_URL = os.environ.get("REDIS_URL")
 CELERY_RESULT_BACKEND = os.environ.get("REDIS_URL")
-CELERY_ACCEPT_CONTENT = ['application/json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
+CELERY_ACCEPT_CONTENT = ["application/json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+
+# Custom app settings
+
+DEFAULT_SCHEDULE_INTERVAL = 3600

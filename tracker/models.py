@@ -1,5 +1,6 @@
 import requests
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django_celery_beat.models import IntervalSchedule, PeriodicTask
@@ -189,9 +190,11 @@ class TelegramUser(AbstractModel):
         """
         return f"{self.user}: {self.telegram_id}"
 
-    def create_approval_task(self, interval: int = 3600) -> "PeriodicTask":
+    def create_approval_task(
+        self, interval: int = settings.DEFAULT_SCHEDULE_INTERVAL
+    ) -> "PeriodicTask":
         """
-        functionality for creating periodic task for fetching user approval or revision.
+        Creates a periodic task for fetching user approval and revision.
         :param interval: The interval for the task (default: 1 hour)
 
         :return: PeriodicTask
