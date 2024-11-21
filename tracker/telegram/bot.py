@@ -168,7 +168,7 @@ async def send_available_issues(msg: Message) -> None:
         await msg.reply(message, parse_mode="HTML")
 
 
-async def send_revision_messages(tele_id: str, reviews_data: list[dict]) -> None:
+async def send_revision_messages(telegram_id: str, reviews_data: list[dict]) -> None:
     """
     Send message for all open PR revisions and approvals
     :params tele_id: The telegram user id of the user to send to
@@ -195,7 +195,7 @@ async def send_revision_messages(tele_id: str, reviews_data: list[dict]) -> None
             )
         message += "-------------------------------"
     # Send bot message
-    await bot.send_message(tele_id, message)
+    await bot.send_message(telegram_id, message)
 
 
 def main_button_markup() -> ReplyKeyboardMarkup:

@@ -234,13 +234,13 @@ def get_pull_reviews(url: str) -> list[dict]:
     return []
 
 
-def get_user_revisions(tele_id: str) -> list[dict]:
+def get_user_revisions(telegram_id: str) -> list[dict]:
     """
     Retrieve all the reviews of a user repositories open PRs
     :params tele_id: The TelegramUser id of the user
     :return: A list of reviews for all the user repos open PRS
     """
-    repos = get_all_repostitories(tele_id)
+    repos = get_all_repostitories(telegram_id)
     reviews_list = []
     for repo in repos:
         pulls = get_all_open_pull_requests(
