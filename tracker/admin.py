@@ -12,8 +12,7 @@ from .models import Repository
 from .telegram.bot import create_tg_link
 
 admin.site.unregister(Group)
-admin.site.register(PeriodicTask)
-admin.site.register(IntervalSchedule)
+
 
 
 @admin.register(Repository)
