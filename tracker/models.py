@@ -119,7 +119,8 @@ class Repository(AbstractModel):
     - name (CharField): The name of the repository with a max length defined by DefaultModelValues.
     - author (CharField): The author of the repository with a max length defined by DefaultModelValues.
     - link (URLField): A URL to the repository with a max length defined by DefaultModelValues.
-
+    - time_limit (PositiveIntegerField): The time limit associated with the repository in seconds.
+    
     Inherits from:
     - AbstractModel: A shared abstract model providing common fields or methods.
 
@@ -131,6 +132,8 @@ class Repository(AbstractModel):
     name = models.CharField(max_length=DefaultModelValues.name_max_length)
     author = models.CharField(max_length=DefaultModelValues.author_max_length)
     link = models.URLField(max_length=DefaultModelValues.link_max_length)
+    time_limit = models.PositiveIntegerField(default=86400)
+
 
     class Meta:
         verbose_name_plural = "Repositories"
