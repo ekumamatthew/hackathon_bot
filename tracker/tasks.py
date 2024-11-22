@@ -21,6 +21,5 @@ def fetch_approvals(telegram_id: str) -> None:
         return
 
     reviews = get_user_revisions(str(telegram_user.telegram_id))
-    print(reviews)
     if reviews:
         async_to_sync(send_revision_messages)(telegram_user.telegram_id, reviews)
