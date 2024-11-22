@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 
 import requests
-from asgiref.sync import sync_to_async
+from asgiref.sync import sync_to_async, async_to_sync
 from dateutil.relativedelta import relativedelta
 
 from .values import HEADERS, PULLS_REVIEWS_URL, PULLS_URL
@@ -240,7 +240,7 @@ def get_user_revisions(telegram_id: str) -> list[dict]:
     :params tele_id: The TelegramUser id of the user
     :return: A list of reviews for all the user repos open PRS
     """
-    repos = get_all_repostitories(telegram_id)
+    repos = async_to_sync(get_all_repostitories)(telegram_id)
     reviews_list = []
     for repo in repos:
         pulls = get_all_open_pull_requests(
