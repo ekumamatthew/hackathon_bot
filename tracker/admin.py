@@ -6,11 +6,14 @@ from django.db.models import QuerySet
 from django.forms import BaseModelForm
 from django.utils.html import format_html
 from django.utils.safestring import SafeString
+from django_celery_beat.models import IntervalSchedule, PeriodicTask
 
 from .models import Repository
 from .telegram.bot import create_tg_link
 
 admin.site.unregister(Group)
+admin.site.register(PeriodicTask)
+admin.site.register(IntervalSchedule)
 
 
 @admin.register(Repository)
@@ -30,6 +33,7 @@ class RepositoryAdmin(admin.ModelAdmin):
     Attributes:
         list_display (tuple): Fields to be displayed in the list view of the admin panel.
     """
+
     list_display = ("name", "author", "telegram_link")
 
     def telegram_link(self, obj) -> SafeString:

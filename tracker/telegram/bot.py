@@ -179,14 +179,14 @@ async def send_revision_messages(telegram_id: str, reviews_data: list[dict]) -> 
     )
     for data in reviews_data:
         message += (
-            "-------------------------------",
-            f"Repo: <b>{data['repo']}</b>",
-            "\n",
-            f"Pull Request: <b>{data['pull']}/<b>" "\n",
-            f"<b>Reviews:</b>",
-            "\n",
+            "-------------------------------"
+            f"Repo: <b>{data['repo']}</b>"
+            "\n"
+            f"Pull Request: <b>{data['pull']}/</b>" "\n"
+            f"<b>Reviews:</b>"
+            "\n"
         )
-        for review in reviews_data["reviews"]:
+        for review in data["reviews"]:
             message += (
                 f"User: <b>{review['user']['login']}</b>"
                 "\n"

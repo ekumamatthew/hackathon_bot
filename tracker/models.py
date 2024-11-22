@@ -204,7 +204,7 @@ class TelegramUser(AbstractModel):
         )
         task, _ = PeriodicTask.objects.get_or_create(
             name=f"user_{self.user.id}_approval_task",
-            task="tasks.fetch_approvals",
+            task="core.tasks.fetch_approvals",
             interval=schedule,
             args=[str(self.telegram_id)],
         )
