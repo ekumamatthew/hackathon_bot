@@ -10,6 +10,7 @@ from aiogram.types.message import Message
 from aiogram.utils.deep_linking import create_start_link
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, ReplyKeyboardMarkup
 from dotenv import load_dotenv
+from aiogram.utils.formatting import Text
 
 from tracker import ISSUES_URL, PULLS_URL, get_issues_without_pull_requests
 from tracker.utils import (
@@ -118,10 +119,9 @@ def escape_html(text: str) -> str:
     Escapes HTML symbols in the text to ensure proper rendering in Telegram messages.
 
     :param text: The input string that may contain HTML symbols.
-    :return: A string with HTML symbols escaped, replacing '&' with '&amp;', '<' with '&lt;',
-             and '>' with '&gt;'.
+    :return: A string with HTML symbols escaped using the Text class.
     """
-    return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+    return Text(text).as_html()
 
 
 @dp.message(F.text == "📖get available issues📖")
