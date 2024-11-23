@@ -14,9 +14,9 @@ from dotenv import load_dotenv
 from tracker import ISSUES_URL, PULLS_URL, get_issues_without_pull_requests
 from tracker.utils import (
     create_telegram_user,
+    get_all_available_issues,
     get_all_repostitories,
     get_user,
-    get_all_available_issues,
 )
 
 load_dotenv()
@@ -121,11 +121,7 @@ def escape_html(text: str) -> str:
     :return: A string with HTML symbols escaped, replacing '&' with '&amp;', '<' with '&lt;',
              and '>' with '&gt;'.
     """
-    return (
-        text.replace("&", "&amp;")
-        .replace("<", "&lt;")
-        .replace(">", "&gt;")
-    )
+    return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
 @dp.message(F.text == "📖get available issues📖")
@@ -170,6 +166,36 @@ async def send_available_issues(msg: Message) -> None:
             message += "No available issues.\n"
 
         await msg.reply(message, parse_mode="HTML")
+
+
+async def send_revision_messages(telegram_id: str, reviews_data: list[dict]) -> None:
+    """
+    Send message for all open PR revisions and approvals
+    :params tele_id: The telegram user id of the user to send to
+    :reviews_data: A list of all the reviews data for all pull requests associated to the user repos
+    """
+    message = (
+        "=" * 50 + "\n" + "<b>Revisions and Approvals</b>" + "\n" + "=" * 50 + "\n\n"
+    )
+    for data in reviews_data:
+        message += (
+            "-------------------------------"
+            f"Repo: <b>{data['repo']}</b>"
+            "\n"
+            f"Pull Request: <b>{data['pull']}/</b>" "\n"
+            f"<b>Reviews:</b>"
+            "\n"
+        )
+        for review in data["reviews"]:
+            message += (
+                f"User: <b>{review['user']['login']}</b>"
+                "\n"
+                f"State: {review['state']}"
+                "\n\n"
+            )
+        message += "-------------------------------"
+    # Send bot message
+    await bot.send_message(telegram_id, message)
 
 
 def main_button_markup() -> ReplyKeyboardMarkup:
