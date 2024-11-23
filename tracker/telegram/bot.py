@@ -8,10 +8,9 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.filters import CommandObject, CommandStart
 from aiogram.types.message import Message
 from aiogram.utils.deep_linking import create_start_link
+from aiogram.utils.formatting import Text
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, ReplyKeyboardMarkup
 from dotenv import load_dotenv
-from aiogram.utils.formatting import Text
-
 from tracker import ISSUES_URL, PULLS_URL, get_issues_without_pull_requests
 from tracker.utils import (
     create_telegram_user,
@@ -182,7 +181,8 @@ async def send_revision_messages(telegram_id: str, reviews_data: list[dict]) -> 
             "-------------------------------"
             f"Repo: <b>{data['repo']}</b>"
             "\n"
-            f"Pull Request: <b>{data['pull']}/</b>" "\n"
+            f"Pull Request: <b>{data['pull']}/</b>"
+            "\n"
             f"<b>Reviews:</b>"
             "\n"
         )
