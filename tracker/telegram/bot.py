@@ -17,6 +17,7 @@ from tracker.utils import (
     get_all_available_issues,
     get_all_repostitories,
     get_user,
+    modify_issue_title,
 )
 
 load_dotenv()
@@ -98,9 +99,13 @@ async def send_deprecated_issue_assignees(msg: Message) -> None:
         )
 
         for issue in issues:
+            issue_title = modify_issue_title(
+                issue.get("title", str()),
+                issue.get("html_url","")
+            )
             message += (
                 "-----------------------------------\n"
-                "Issue: " + issue.get("title", str()) + "\n"
+                f"Issue: {issue_title} \n"
                 "User: " + issue.get("assignee", dict()).get("login", str()) + "\n"
                 "Assigned:" + "\n"
                 "\t\t\t\tDays ago: " + str(issue["days"]) + "\n"
@@ -151,12 +156,16 @@ async def send_available_issues(msg: Message) -> None:
         )
 
         for issue in issues:
+            issue_title = modify_issue_title(
+                issue.get("title", "No title provided"),
+                issue.get("html_url","")
+            )
             description = issue.get("body", "No description provided.")
             escaped_description = escape_html(description)
 
             message += (
                 "-----------------------------------\n"
-                f"Issue #{issue.get('number', 'Unknown')}: {issue.get('title', 'No title provided')}\n"
+                f"Issue #{issue.get('number', 'Unknown')}: {issue_title}\n"
                 f"Author: {issue.get('user', {}).get('login', 'Unknown')}\n"
                 f"Description: <blockquote expandable>{escaped_description}</blockquote>\n"
                 "-----------------------------------\n"
