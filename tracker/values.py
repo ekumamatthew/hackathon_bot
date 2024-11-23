@@ -35,3 +35,4 @@ class DefaultModelValues:
     author_max_length: int = 255
     link_max_length: int = 255
     email_max_length: int = 255
+    time_limit_default: int = 86400
