@@ -132,7 +132,7 @@ class Repository(AbstractModel):
     name = models.CharField(max_length=DefaultModelValues.name_max_length)
     author = models.CharField(max_length=DefaultModelValues.author_max_length)
     link = models.URLField(max_length=DefaultModelValues.link_max_length)
-    time_limit = models.PositiveIntegerField(default=86400)
+    time_limit = models.PositiveIntegerField(default=DefaultModelValues.time_limit_default)
 
 
     class Meta:
