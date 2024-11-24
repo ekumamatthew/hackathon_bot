@@ -3,12 +3,11 @@ import logging
 import os
 import sys
 
-from aiogram import Bot, Dispatcher, F
+from aiogram import Bot, Dispatcher, F, html
 from aiogram.client.default import DefaultBotProperties
 from aiogram.filters import CommandObject, CommandStart
 from aiogram.types.message import Message
 from aiogram.utils.deep_linking import create_start_link
-from aiogram.utils.formatting import Text
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, ReplyKeyboardMarkup
 from dotenv import load_dotenv
 from tracker import ISSUES_URL, PULLS_URL, get_issues_without_pull_requests
@@ -118,9 +117,10 @@ def escape_html(text: str) -> str:
     Escapes HTML symbols in the text to ensure proper rendering in Telegram messages.
 
     :param text: The input string that may contain HTML symbols.
-    :return: A string with HTML symbols escaped using the Text class.
+    :return: A string with HTML symbols escaped, replacing '&' with '&amp;', '<' with '&lt;',
+             and '>' with '&gt;'.
     """
-    return Text(text).as_html()
+    return html.unparse()
 
 
 @dp.message(F.text == "📖get available issues📖")
