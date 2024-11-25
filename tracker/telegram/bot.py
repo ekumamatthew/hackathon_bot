@@ -120,7 +120,7 @@ def escape_html(text: str) -> str:
     :return: A string with HTML symbols escaped, replacing '&' with '&amp;', '<' with '&lt;',
              and '>' with '&gt;'.
     """
-    return html.unparse()
+    return html.unparse(text)
 
 
 @dp.message(F.text == "📖get available issues📖")
