@@ -262,9 +262,9 @@ def get_user_revisions(telegram_id: str) -> list[dict]:
     return reviews_list
 
 
-def modify_issue_title(issue_title: str, issue_link: str) -> str:
+def attach_link_to_issue(issue_title: str, issue_link: str) -> str:
     """
-    Modifies the issue title with the issue link
+    Attaches the issue link to the issue title
     :params issue_title: The title of the issue
     :params issue_link: The link to the issue
 

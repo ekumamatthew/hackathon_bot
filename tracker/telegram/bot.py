@@ -17,7 +17,7 @@ from tracker.utils import (
     get_all_available_issues,
     get_all_repostitories,
     get_user,
-    modify_issue_title,
+    attach_link_to_issue,
 )
 
 load_dotenv()
@@ -99,7 +99,7 @@ async def send_deprecated_issue_assignees(msg: Message) -> None:
         )
 
         for issue in issues:
-            issue_title = modify_issue_title(
+            issue_title = attach_link_to_issue(
                 issue.get("title", str()),
                 issue.get("html_url","")
             )
@@ -156,7 +156,7 @@ async def send_available_issues(msg: Message) -> None:
         )
 
         for issue in issues:
-            issue_title = modify_issue_title(
+            issue_title = attach_link_to_issue(
                 issue.get("title", "No title provided"),
                 issue.get("html_url","")
             )
