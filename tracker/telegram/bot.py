@@ -3,14 +3,13 @@ import logging
 import os
 import sys
 
-from aiogram import Bot, Dispatcher, F
+from aiogram import Bot, Dispatcher, F, html
 from aiogram.client.default import DefaultBotProperties
 from aiogram.filters import CommandObject, CommandStart
 from aiogram.types.message import Message
 from aiogram.utils.deep_linking import create_start_link
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, ReplyKeyboardMarkup
 from dotenv import load_dotenv
-
 from tracker import ISSUES_URL, PULLS_URL, get_issues_without_pull_requests
 from tracker.utils import (
     create_telegram_user,
@@ -126,7 +125,7 @@ def escape_html(text: str) -> str:
     :return: A string with HTML symbols escaped, replacing '&' with '&amp;', '<' with '&lt;',
              and '>' with '&gt;'.
     """
-    return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+    return html.unparse(text)
 
 
 @dp.message(F.text == "📖get available issues📖")
@@ -191,7 +190,8 @@ async def send_revision_messages(telegram_id: str, reviews_data: list[dict]) -> 
             "-------------------------------"
             f"Repo: <b>{data['repo']}</b>"
             "\n"
-            f"Pull Request: <b>{data['pull']}/</b>" "\n"
+            f"Pull Request: <b>{data['pull']}/</b>"
+            "\n"
             f"<b>Reviews:</b>"
             "\n"
         )
