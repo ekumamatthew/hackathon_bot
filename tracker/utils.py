@@ -260,3 +260,15 @@ def get_user_revisions(telegram_id: str) -> list[dict]:
                 return_data["reviews"] = reviews_data
                 reviews_list.append(return_data.copy())
     return reviews_list
+
+
+def attach_link_to_issue(issue_title: str, issue_link: str) -> str:
+    """
+    Attaches the issue link to the issue title
+    :params issue_title: The title of the issue
+    :params issue_link: The link to the issue
+
+    :return: str
+    """
+    title = f'<a href="{issue_link}">{issue_title}</a>'
+    return title
