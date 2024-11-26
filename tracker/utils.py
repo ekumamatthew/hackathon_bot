@@ -274,13 +274,12 @@ def get_contributor_issues(username: str) -> list:
 
         response.raise_for_status()
 
-        if response.ok:
-            issues = response.json().get('items', [])
-            issues_format = []
-            for issue in issues:
-                issues_format.append(
-                    f"Issue: {issue['title']} - URL: {issue['html_url']}")
-            return issues_format
+        issues = response.json().get('items', [])
+        issues_format = []
+        for issue in issues:
+            issues_format.append(
+                f"Issue: {issue.get('title')} - URL: {issue.get('html_url')}")
+        return issues_format
 
     except requests.exceptions.RequestException as e:
         logger.info(e)
