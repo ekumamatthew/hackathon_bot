@@ -4,6 +4,7 @@ from datetime import datetime
 import requests
 from asgiref.sync import sync_to_async
 from dateutil.relativedelta import relativedelta
+from collections import defaultdict
 
 from .values import HEADERS
 
@@ -59,9 +60,14 @@ def check_issue_assignment_events(issue: dict) -> dict:
     """
     Checks an issue's timeline for assignment events to determine if it was
     newly assigned or reassigned to a different contributor.
+    It retrieves events related to the assignment of the issue
+    and extracts the assignee's login and the assignment time.
 
-    :param issue: The issue dictionary.
-    :return: Dictionary with reassignment details and the exact time if applicable.
+    :param issue: The issue dictionary containing information about the issue, including
+                  an "events_url" to fetch assignment events.
+    :return: A dictionary with two keys:
+             - "assignee": the login of the user assigned to the issue (empty string if not assigned).
+             - "assigned_at": the time the issue was assigned (empty string if no assignment event).
     """
     try:
         events_url = issue.get("events_url", str())
@@ -70,19 +76,16 @@ def check_issue_assignment_events(issue: dict) -> dict:
         response.raise_for_status()
 
         events = response.json()
-        assignment_info = {
-            "assignee": None,
-            "assigned_at": None,
-        }
+
+        assignment_info = defaultdict(str)
 
         for event in events:
             if event.get("event") == "assigned":
-                assignment_info["assignee"] = event.get("assignee", dict()).get(
-                    "login", str()
-                )
-                assignment_info["assigned_at"] = event.get("created_at", str())
+                assignment_info["assignee"] = event.get("assignee", {}).get("login", "")
+                assignment_info["assigned_at"] = event.get("created_at", "")
 
-        return assignment_info
+        return dict(assignment_info)
+
     except requests.exceptions.RequestException as e:
         logger.info(e)
     return {}
@@ -208,9 +211,13 @@ def get_all_available_issues(url: str) -> list[dict]:
         available_issues = list(
             filter(
                 lambda issue: issue.get("state") == "open"
-                and not issue.get("assignee")
-                and not issue.get("draft")
-                and not issue.get("pull_request"),
+                and not any(
+                    [
+                        issue.get("assignee"),
+                        issue.get("draft"),
+                        issue.get("pull_request"),
+                    ]
+                ),
                 issues,
             )
         )

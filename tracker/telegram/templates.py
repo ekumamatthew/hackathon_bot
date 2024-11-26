@@ -1,11 +1,25 @@
+from dataclasses import dataclass
 from string import Template
 
-TEMPLATES = {
-    "greeting": Template("Hello $user_mention!\nWould you like to check some issues?"),
-    "repo_header": Template(
+
+@dataclass
+class TemplateNames:
+    """Class to hold all the templates used in the bot."""
+
+    greeting: Template
+    repo_header: Template
+    issue_detail: Template
+    no_missed_deadlines: Template
+    issue_summary: Template
+    no_issues: Template
+
+
+TEMPLATES = TemplateNames(
+    greeting=Template("Hello $user_mention!\nWould you like to check some issues?"),
+    repo_header=Template(
         "=" * 50 + "\n<b>Repository: $author/$repo</b>\n" + "=" * 50 + "\n\n"
     ),
-    "issue_detail": Template(
+    issue_detail=Template(
         "-----------------------------------\n"
         "Issue: $title\n"
         "User: $user\n"
@@ -13,11 +27,11 @@ TEMPLATES = {
         "\t\t\t\tDays ago: $days\n"
         "-----------------------------------\n"
     ),
-    "no_missed_deadlines": Template("No missed deadlines.\n"),
-    "issue_summary": Template(
+    no_missed_deadlines=Template("No missed deadlines.\n"),
+    issue_summary=Template(
         "-----------------------------------\n"
         "Issue: $title\n"
         "-----------------------------------\n"
     ),
-    "no_issues": Template("No available issues.\n"),
-}
+    no_issues=Template("No available issues.\n"),
+)

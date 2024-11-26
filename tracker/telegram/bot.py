@@ -10,14 +10,13 @@ from aiogram.types.message import Message
 from aiogram.utils.deep_linking import create_start_link
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, ReplyKeyboardMarkup
 from dotenv import load_dotenv
-from .templates import TEMPLATES
-
 from tracker import ISSUES_URL, PULLS_URL, get_issues_without_pull_requests
+from tracker.telegram.templates import TEMPLATES
 from tracker.utils import (
     create_telegram_user,
+    get_all_available_issues,
     get_all_repostitories,
     get_user,
-    get_all_available_issues,
 )
 
 load_dotenv()
@@ -47,7 +46,7 @@ async def auth_link_handler(message: Message, command: CommandObject) -> None:
     await create_telegram_user(
         user=next(iter(user)), telegram_id=str(message.from_user.id)
     )
-    message_text = TEMPLATES["greeting"].substitute(
+    message_text = TEMPLATES.greeting.substitute(
         user_mention=message.from_user.mention_html()
     )
     await message.answer(
@@ -63,7 +62,7 @@ async def start_message(message: Message) -> None:
     :param message: Message that starts the bot.
     :return: None
     """
-    message_text = TEMPLATES["greeting"].substitute(
+    message_text = TEMPLATES.greeting.substitute(
         user_mention=message.from_user.mention_html()
     )
     await message.answer(
@@ -83,7 +82,7 @@ async def send_deprecated_issue_assignees(msg: Message) -> None:
 
     for repository in all_repositories:
 
-        repo_message = TEMPLATES["repo_header"].substitute(
+        repo_message = TEMPLATES.repo_header.substitute(
             author=repository.get("author", "Unknown"),
             repo=repository.get("name", "Unknown"),
         )
@@ -101,14 +100,14 @@ async def send_deprecated_issue_assignees(msg: Message) -> None:
 
         issue_messages = ""
         for issue in issues:
-            issue_messages += TEMPLATES["issue_detail"].substitute(
+            issue_messages += TEMPLATES.issue_detail.substitute(
                 title=issue.get("title", "No title"),
                 user=issue.get("assignee", {}).get("login", "Unassigned"),
                 days=issue.get("days", "N/A"),
             )
 
         if not issues:
-            issue_messages = TEMPLATES["no_missed_deadlines"].template
+            issue_messages = TEMPLATES.no_missed_deadlines.template
 
         message = repo_message + issue_messages
 
@@ -125,7 +124,7 @@ async def send_available_issues(msg: Message) -> None:
     all_repositories = await get_all_repostitories(msg.from_user.id)
 
     for repository in all_repositories:
-        repo_message = TEMPLATES["repo_header"].substitute(
+        repo_message = TEMPLATES.repo_header.substitute(
             author=repository.get("author", "Unknown"),
             repo=repository.get("name", "Unknown"),
         )
@@ -139,12 +138,12 @@ async def send_available_issues(msg: Message) -> None:
 
         issue_messages = ""
         for issue in issues:
-            issue_messages += TEMPLATES["issue_summary"].substitute(
+            issue_messages += TEMPLATES.issue_summary.substitute(
                 title=issue.get("title", "No title provided")
             )
 
         if not issues:
-            issue_messages = TEMPLATES["no_issues"].template
+            issue_messages = TEMPLATES.no_issues.template
 
         message = repo_message + issue_messages
 
