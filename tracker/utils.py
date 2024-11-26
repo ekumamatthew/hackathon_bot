@@ -69,21 +69,20 @@ def check_issue_assignment_events(issue: dict) -> dict:
         response = requests.get(events_url, headers=HEADERS)
         response.raise_for_status()
 
-        if response.ok:
-            events = response.json()
-            assignment_info = {
-                "assignee": None,
-                "assigned_at": None,
-            }
+        events = response.json()
+        assignment_info = {
+            "assignee": None,
+            "assigned_at": None,
+        }
 
-            for event in events:
-                if event.get("event") == "assigned":
-                    assignment_info["assignee"] = event.get("assignee", dict()).get(
-                        "login", str()
-                    )
-                    assignment_info["assigned_at"] = event.get("created_at", str())
+        for event in events:
+            if event.get("event") == "assigned":
+                assignment_info["assignee"] = event.get("assignee", dict()).get(
+                    "login", str()
+                )
+                assignment_info["assigned_at"] = event.get("created_at", str())
 
-            return assignment_info
+        return assignment_info
     except requests.exceptions.RequestException as e:
         logger.info(e)
     return {}
@@ -92,6 +91,10 @@ def check_issue_assignment_events(issue: dict) -> dict:
 def get_all_open_and_assigned_issues(url: str) -> list[dict]:
     """
     Retrieves all open and assigned issues from a given URL.
+    This function makes a GET request to the provided URL to fetch issues data,
+    and filters the results to return only open and assigned issues.
+    If the request fails, an empty list will be returned.
+
     :param url: The API endpoint for issues.
     :return: A list of dictionaries representing open and assigned issues.
     """
@@ -99,20 +102,19 @@ def get_all_open_and_assigned_issues(url: str) -> list[dict]:
         response = requests.get(url, headers=HEADERS)
         response.raise_for_status()
 
-        if response.ok:
-            issues = response.json()
+        issues = response.json()
 
-            open_assigned_issues = list(
-                filter(
-                    lambda issue: issue.get("state") == "open"
-                    and issue.get("assignee")
-                    and not issue.get("draft")
-                    and not issue.get("pull_request"),
-                    issues,
-                )
+        open_assigned_issues = list(
+            filter(
+                lambda issue: issue.get("state") == "open"
+                and issue.get("assignee")
+                and not issue.get("draft")
+                and not issue.get("pull_request"),
+                issues,
             )
+        )
 
-            return open_assigned_issues
+        return open_assigned_issues
 
     except requests.exceptions.RequestException as e:
         logger.info(e)
@@ -122,6 +124,9 @@ def get_all_open_and_assigned_issues(url: str) -> list[dict]:
 def get_all_open_pull_requests(url: str) -> list[dict]:
     """
     Retrieves all open pull requests from a given URL.
+    This function sends a GET request to the specified URL with the `state=open` parameter
+    to retrieve open pull requests. If the request is successful, it returns the response
+    as a list of dictionaries. If the request fails, an empty list is returned.
 
     :param url: The API endpoint for pull requests.
     :return: A list of dictionaries representing open pull requests.
@@ -130,10 +135,9 @@ def get_all_open_pull_requests(url: str) -> list[dict]:
         response = requests.get(url, headers=HEADERS, params={"state": "open"})
         response.raise_for_status()
 
-        if response.ok:
-            response = response.json()
+        response = response.json()
 
-            return response
+        return response
 
     except requests.exceptions.RequestException as e:
         logger.info(e)
@@ -190,27 +194,28 @@ def get_issues_without_pull_requests(
 def get_all_available_issues(url: str) -> list[dict]:
     """
     Retrieves all available issues from a given URL.
+    If the response status is not successful, it raises an exception and returns an empty list.
+
     :param url: The API endpoint for issues.
-    :return: A list of dictionaries representing available issues.
+    :return: A list of dictionaries representing available issues or an empty list if an error occurs.
     """
     try:
         response = requests.get(url, headers=HEADERS)
         response.raise_for_status()
 
-        if response.ok:
-            issues = response.json()
+        issues = response.json()
 
-            available_issues = list(
-                filter(
-                    lambda issue: issue.get("state") == "open"
-                    and not issue.get("assignee")
-                    and not issue.get("draft")
-                    and not issue.get("pull_request"),
-                    issues,
-                )
+        available_issues = list(
+            filter(
+                lambda issue: issue.get("state") == "open"
+                and not issue.get("assignee")
+                and not issue.get("draft")
+                and not issue.get("pull_request"),
+                issues,
             )
-            logger.info(available_issues)
-            return available_issues
+        )
+        logger.info(available_issues)
+        return available_issues
 
     except requests.exceptions.RequestException as e:
         logger.info(e)
