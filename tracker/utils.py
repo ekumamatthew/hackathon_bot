@@ -281,3 +281,15 @@ def get_contributor_issues(username: str) -> list:
     else:
         print(f"Error: {response.status_code}, {response.json()}")
         return []
+
+def attach_link_to_issue(issue_title: str, issue_link: str) -> str:
+    """
+    Attaches the issue link to the issue title
+    :params issue_title: The title of the issue
+    :params issue_link: The link to the issue
+
+    :return: str
+    """
+    title = f'<a href="{issue_link}">{issue_title}</a>'
+    return title
+
