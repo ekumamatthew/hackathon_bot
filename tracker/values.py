@@ -10,6 +10,7 @@ PULLS_URL = "https://api.github.com/repos/{owner}/{repo}/pulls"
 PULLS_REVIEWS_URL = (
     "https://api.github.com/repos/{owner}/{repo}/pulls/{pull_number}/reviews"
 )
+ISSUES_SEARCH = "https://api.github.com/search/issues?q=author:{username}"
 
 HEADERS = {
     "Accept": "application/vnd.github+json",

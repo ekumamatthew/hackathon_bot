@@ -267,20 +267,24 @@ def get_contributor_issues(username: str) -> list:
     :param username: The username of the github account.
     :return: A list representing issues assigned.
     """
+    try:
+        api_url = ISSUES_SEARCH.format(username = username)
 
-    api_url = f"https://api.github.com/search/issues?q=author:{username}"
+        response = requests.get(api_url, headers=HEADERS)
 
-    response = requests.get(api_url, headers=HEADERS)
-    if response.status_code == 200:
-        issues = response.json().get('items', [])
-        issues_format = []
-        for issue in issues:
-            issues_format.append(
-                f"Issue: {issue['title']} - URL: {issue['html_url']}")
-        return issues_format
-    else:
-        print(f"Error: {response.status_code}, {response.json()}")
-        return []
+        response.raise_for_status()
+
+        if response.ok:
+            issues = response.json().get('items', [])
+            issues_format = []
+            for issue in issues:
+                issues_format.append(
+                    f"Issue: {issue['title']} - URL: {issue['html_url']}")
+            return issues_format
+
+    except requests.exceptions.RequestException as e:
+        logger.info(e)
+    return []
 
 def attach_link_to_issue(issue_title: str, issue_link: str) -> str:
     """
