@@ -260,3 +260,24 @@ def get_user_revisions(telegram_id: str) -> list[dict]:
                 return_data["reviews"] = reviews_data
                 reviews_list.append(return_data.copy())
     return reviews_list
+
+def get_contributor_issues(username: str) -> list:
+    """
+    Retrieves all issues for assigned to the user github.
+    :param username: The username of the github account.
+    :return: A list representing issues assigned.
+    """
+
+    api_url = f"https://api.github.com/search/issues?q=author:{username}"
+
+    response = requests.get(api_url, headers=HEADERS)
+    if response.status_code == 200:
+        issues = response.json().get('items', [])
+        issues_format = []
+        for issue in issues:
+            issues_format.append(
+                f"Issue: {issue['title']} - URL: {issue['html_url']}")
+        return issues_format
+    else:
+        print(f"Error: {response.status_code}, {response.json()}")
+        return []
