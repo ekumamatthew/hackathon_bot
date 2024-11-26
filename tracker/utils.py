@@ -2,11 +2,11 @@ import logging
 from datetime import datetime
 
 import requests
-from asgiref.sync import sync_to_async
+from asgiref.sync import sync_to_async, async_to_sync
 from dateutil.relativedelta import relativedelta
 from collections import defaultdict
 
-from .values import HEADERS
+from .values import HEADERS, PULLS_REVIEWS_URL, PULLS_URL
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -227,3 +227,60 @@ def get_all_available_issues(url: str) -> list[dict]:
     except requests.exceptions.RequestException as e:
         logger.info(e)
     return []
+
+
+def get_pull_reviews(url: str) -> list[dict]:
+    """
+    Retrieves all reviews for a pull request.
+    :param url: The API endpoint for pull request review.
+    :return: A list of dictionaries representing available issues.
+    """
+    try:
+        response = requests.get(url, headers=HEADERS)
+        response.raise_for_status()
+
+        if response.ok:
+            return response.json()
+    except requests.exceptions.RequestException as e:
+        logger.info(e)
+    return []
+
+
+def get_user_revisions(telegram_id: str) -> list[dict]:
+    """
+    Retrieve all the reviews of a user repositories open PRs
+    :params tele_id: The TelegramUser id of the user
+    :return: A list of reviews for all the user repos open PRS
+    """
+    repos = async_to_sync(get_all_repostitories)(telegram_id)
+    reviews_list = []
+    for repo in repos:
+        pulls = get_all_open_pull_requests(
+            PULLS_URL.format(owner=repo.get("author", ""), repo=repo.get("name", ""))
+        )
+        return_data = {"repo": repo.get("name", "")}
+        for pull in pulls:
+            return_data["pull"] = pull.get("title", "")  # add the pull title
+            reviews_data = get_pull_reviews(
+                url=PULLS_REVIEWS_URL.format(
+                    owner=repo.get("author", ""),
+                    repo=repo.get("name", ""),
+                    pull_number=pull["number"],
+                )
+            )
+            if reviews_data:
+                return_data["reviews"] = reviews_data
+                reviews_list.append(return_data.copy())
+    return reviews_list
+
+
+def attach_link_to_issue(issue_title: str, issue_link: str) -> str:
+    """
+    Attaches the issue link to the issue title
+    :params issue_title: The title of the issue
+    :params issue_link: The link to the issue
+
+    :return: str
+    """
+    title = f'<a href="{issue_link}">{issue_title}</a>'
+    return title

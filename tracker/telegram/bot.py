@@ -3,7 +3,7 @@ import logging
 import os
 import sys
 
-from aiogram import Bot, Dispatcher, F
+from aiogram import Bot, Dispatcher, F, html
 from aiogram.client.default import DefaultBotProperties
 from aiogram.filters import CommandObject, CommandStart
 from aiogram.types.message import Message
@@ -17,6 +17,7 @@ from tracker.utils import (
     get_all_available_issues,
     get_all_repostitories,
     get_user,
+    attach_link_to_issue,
 )
 
 load_dotenv()
@@ -104,6 +105,7 @@ async def send_deprecated_issue_assignees(msg: Message) -> None:
                 title=issue.get("title", "No title"),
                 user=issue.get("assignee", {}).get("login", "Unassigned"),
                 days=issue.get("days", "N/A"),
+
             )
 
         if not issues:
@@ -112,6 +114,17 @@ async def send_deprecated_issue_assignees(msg: Message) -> None:
         message = repo_message + issue_messages
 
         await msg.reply(f"<blockquote>{message}</blockquote>")
+
+
+def escape_html(text: str) -> str:
+    """
+    Escapes HTML symbols in the text to ensure proper rendering in Telegram messages.
+
+    :param text: The input string that may contain HTML symbols.
+    :return: A string with HTML symbols escaped, replacing '&' with '&amp;', '<' with '&lt;',
+             and '>' with '&gt;'.
+    """
+    return html.unparse(text)
 
 
 @dp.message(F.text == "📖get available issues📖")
@@ -136,10 +149,12 @@ async def send_available_issues(msg: Message) -> None:
             ),
         )
 
+
         issue_messages = ""
         for issue in issues:
             issue_messages += TEMPLATES.issue_summary.substitute(
                 title=issue.get("title", "No title provided")
+
             )
 
         if not issues:
@@ -147,7 +162,38 @@ async def send_available_issues(msg: Message) -> None:
 
         message = repo_message + issue_messages
 
-        await msg.reply(f"<blockquote>{message}</blockquote>")
+        await msg.reply(message, parse_mode="HTML")
+
+
+async def send_revision_messages(telegram_id: str, reviews_data: list[dict]) -> None:
+    """
+    Send message for all open PR revisions and approvals
+    :params tele_id: The telegram user id of the user to send to
+    :reviews_data: A list of all the reviews data for all pull requests associated to the user repos
+    """
+    message = (
+        "=" * 50 + "\n" + "<b>Revisions and Approvals</b>" + "\n" + "=" * 50 + "\n\n"
+    )
+    for data in reviews_data:
+        message += (
+            "-------------------------------"
+            f"Repo: <b>{data['repo']}</b>"
+            "\n"
+            f"Pull Request: <b>{data['pull']}/</b>"
+            "\n"
+            f"<b>Reviews:</b>"
+            "\n"
+        )
+        for review in data["reviews"]:
+            message += (
+                f"User: <b>{review['user']['login']}</b>"
+                "\n"
+                f"State: {review['state']}"
+                "\n\n"
+            )
+        message += "-------------------------------"
+    # Send bot message
+    await bot.send_message(telegram_id, message)
 
 
 def main_button_markup() -> ReplyKeyboardMarkup:
