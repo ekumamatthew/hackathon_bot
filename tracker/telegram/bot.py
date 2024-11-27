@@ -176,12 +176,11 @@ async def get_contributor_tasks(message: Message):
 
     if len(issues) > 0:
         for issue in issues:
-            msg += (
-                    f"{issue}\n"
-                    "-----------------------------------\n"
-                )
+            msg += TEMPLATES.issue_list_item.substitute(
+                issue=issue,
+            )
     else:
-        msg = "No ODHack Issues assigned"
+        msg = TEMPLATES.no_issues.template
     await message.reply(msg)
 
 
