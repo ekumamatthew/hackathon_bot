@@ -10,6 +10,7 @@ PULLS_URL = "https://api.github.com/repos/{owner}/{repo}/pulls"
 PULLS_REVIEWS_URL = (
     "https://api.github.com/repos/{owner}/{repo}/pulls/{pull_number}/reviews"
 )
+ROLE_MAX_CHARACTER_LENGTH = 11
 
 HEADERS = {
     "Accept": "application/vnd.github+json",
