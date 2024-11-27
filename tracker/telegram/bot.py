@@ -164,6 +164,26 @@ async def send_available_issues(msg: Message) -> None:
 
         await msg.reply(message, parse_mode="HTML")
 
+@dp.message(F.text.contains("/issues "))
+async def get_contributor_tasks(message: Message):
+    _ , username = message.text.split(" ", 1)
+
+    regex = r"ODHack"
+
+    issues = get_user_issues(username, True, True, regex)
+
+    msg = "ODHack Issues assigned: \n"
+
+    if len(issues) > 0:
+        for issue in issues:
+            msg += (
+                    f"{issue}\n"
+                    "-----------------------------------\n"
+                )
+    else:
+        msg = "No ODHack Issues assigned"
+    await message.reply(msg)
+
 
 async def send_revision_messages(telegram_id: str, reviews_data: list[dict]) -> None:
     """

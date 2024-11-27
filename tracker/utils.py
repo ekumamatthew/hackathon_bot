@@ -273,7 +273,7 @@ def get_user_revisions(telegram_id: str) -> list[dict]:
                 reviews_list.append(return_data.copy())
     return reviews_list
 
-def get_contributor_issues(username: str) -> list:
+def get_contributor_issues(username: str, isStateOpen: bool, matchLabel: bool = False, regex: str = "") -> list:
     """
     Retrieves all issues for assigned to the user github.
     :param username: The username of the github account.
@@ -289,8 +289,17 @@ def get_contributor_issues(username: str) -> list:
         issues = response.json().get('items', [])
         issues_format = []
         for issue in issues:
-            issues_format.append(
-                f"Issue: {issue.get('title')} - URL: {issue.get('html_url')}")
+
+            if isStateOpen and issue['state'] != 'open':
+                continue
+
+            labels = [label['name'] for label in issue.get('labels', [])]
+            for label in labels:
+                if not matchLabel or re.search(regex, label, re.IGNORECASE): 
+                    issues_format.append(
+                        f"Issue: {issue['title']}: {issue['html_url']}")
+                    break   
+
         return issues_format
 
     except requests.exceptions.RequestException as e:
