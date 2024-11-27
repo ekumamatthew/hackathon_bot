@@ -12,6 +12,7 @@ class TemplateNames:
     no_missed_deadlines: Template
     issue_summary: Template
     no_issues: Template
+    issue_list_item: Template
 
 
 TEMPLATES = TemplateNames(
@@ -34,4 +35,10 @@ TEMPLATES = TemplateNames(
         "-----------------------------------\n"
     ),
     no_issues=Template("No available issues.\n"),
+    issue_list_item=Template(
+        "-----------------------------------\n"
+        "$issue\n"
+        "-----------------------------------\n"
+    ),
+
 )

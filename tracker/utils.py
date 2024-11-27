@@ -273,6 +273,38 @@ def get_user_revisions(telegram_id: str) -> list[dict]:
                 reviews_list.append(return_data.copy())
     return reviews_list
 
+def get_contributor_issues(username: str, is_state_open: bool, match_label: bool = False, regex: str = "") -> list:
+    """
+    Retrieves all issues assigned to the github account matching the username.
+    :param username: The username of the github account.
+    :return: A list representing issues assigned.
+    """
+    try:
+        api_url = ISSUES_SEARCH.format(username = username)
+
+        response = requests.get(api_url, headers=HEADERS)
+
+        response.raise_for_status()
+
+        issues = response.json().get('items', [])
+        issues_format = []
+        for issue in issues:
+
+            if is_state_open and issue.get('state') != 'open':
+                continue
+
+            labels = [label.get('name') for label in issue.get('labels', [])]
+            for label in labels:
+                if not match_label or re.search(regex, label, re.IGNORECASE): 
+                    issues_format.append(
+                        f"Issue: {issue.get('title')}: {issue.get('html_url')}")
+                    break   
+
+        return issues_format
+
+    except requests.exceptions.RequestException as e:
+        logger.info(e)
+    return []
 
 def attach_link_to_issue(issue_title: str, issue_link: str) -> str:
     """
@@ -284,3 +316,4 @@ def attach_link_to_issue(issue_title: str, issue_link: str) -> str:
     """
     title = f'<a href="{issue_link}">{issue_title}</a>'
     return title
+
