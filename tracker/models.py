@@ -251,4 +251,8 @@ class Contributor(AbstractModel):
         verbose_name_plural = "Contributors"
     
     def __str__(self):
-        return f"Contributor: {self.user.email} (Role: {self.role})"
+        """
+        Returns a string representation of the contributor, which is the telegram_id and role.
+        :return: str
+        """
+        return f"Contributor: {self.telegram_id} (Role: {self.role})"
