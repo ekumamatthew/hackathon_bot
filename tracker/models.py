@@ -223,3 +223,26 @@ class TelegramUser(AbstractModel):
             args=[str(self.telegram_id)],
         )
         return task
+
+
+class Contributor(AbstractModel):
+    """
+    Representes a contributor with specific details and metadata
+    
+    Attributes:
+    - user (CustomUser): A ForeignKey to the CustomUser model.
+    - role (str): The role of the contributor.
+    - notes (str): Notes for contributors, visible only to project leads.
+    - rank (int): A ranking for the contributor, also only visible to project leads.
+    """
+
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="contributors")
+    role = models.CharField(max_length=ROLE_MAX_CHARACTER_LENGTH, choices=Roles.choices, default=Roles.CONTRIBUTOR)
+    notes = models.TextField(blank=True, null=True)
+    rank = models.IntegerField(default=0)
+
+    class Meta:
+        verbose_name_plural = "Contributors"
+    
+    def __str__(self):
+        return f"Contributor: {self.user.email} (Role: {self.role})"
