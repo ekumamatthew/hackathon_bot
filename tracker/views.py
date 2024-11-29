@@ -53,6 +53,13 @@ class ContributorListView(View):
     """
     
     def get(self, request, *args, **kwargs):
+        """
+        A GET request for this view.
+        :param request: HttpRequest
+        :param args: tuple
+        :param kwargs: dict
+        :return: JsonResponse
+        """
         user = request.user
         contributors = Contributor.objects.all()
         
