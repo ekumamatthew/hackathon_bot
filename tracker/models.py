@@ -1,13 +1,15 @@
 import requests
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.conf import settings
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.core.exceptions import ValidationError
 from django.db import models
 from django_celery_beat.models import IntervalSchedule, PeriodicTask
 
 from shared.models import AbstractModel
+from tracker.choices import Roles
+from tracker.values import ROLE_MAX_CHARACTER_LENGTH, DefaultModelValues
 
-from .values import DefaultModelValues
+
 
 
 class CustomUserManager(BaseUserManager):
@@ -19,7 +21,7 @@ class CustomUserManager(BaseUserManager):
     - create_superuser: Creates and returns a new superuser with the given email and password.
     """
 
-    def create_user(self, email: str = None, password: str = None) -> "CustomUser":
+    def create_user(self, email: str = None, password: str = None, role: str = None) -> "CustomUser":
         """
         Creates a new user
         :param email: str = None
@@ -29,6 +31,7 @@ class CustomUserManager(BaseUserManager):
         user = self.model(
             email=self.normalize_email(email),
             password=password,
+            role=role,
         )
 
         user.is_active = True
@@ -38,14 +41,15 @@ class CustomUserManager(BaseUserManager):
 
         return user
 
-    def create_superuser(self, email: str = None, password: str = None) -> "CustomUser":
+    def create_superuser(self, email: str = None, password: str = None, role: str = None) -> "CustomUser":
         """
         Creates a new superuser
         :param email: str = None
         :param password: str = None
+        :param role: str = None
         :return: CustomUser
         """
-        user = self.create_user(email, password)
+        user = self.create_user(email, password, role)
 
         user.is_admin = True
         user.save(update_fields=["is_admin", "is_active"])
@@ -59,6 +63,7 @@ class CustomUser(AbstractModel, AbstractBaseUser):
 
     Attributes:
     - email (EmailField): The email of the user which is unique and serves as the username.
+    - role (CharField): The role of the user which is either contributor or lead.
     - is_active (BooleanField): Indicates whether the user is active. Default is True.
     - is_admin (BooleanField): Indicates whether the user is an admin. Default is False.
 
@@ -74,6 +79,11 @@ class CustomUser(AbstractModel, AbstractBaseUser):
     )
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
+    role = models.CharField(
+        max_length=ROLE_MAX_CHARACTER_LENGTH,
+        choices=Roles.choices,
+        default=Roles.CONTRIBUTOR,
+    )
     USERNAME_FIELD = "email"
 
     objects = CustomUserManager()
@@ -122,7 +132,7 @@ class Repository(AbstractModel):
     - author (CharField): The author of the repository with a max length defined by DefaultModelValues.
     - link (URLField): A URL to the repository with a max length defined by DefaultModelValues.
     - time_limit (PositiveIntegerField): The time limit associated with the repository in seconds.
-    
+
     Inherits from:
     - AbstractModel: A shared abstract model providing common fields or methods.
 
@@ -134,8 +144,9 @@ class Repository(AbstractModel):
     name = models.CharField(max_length=DefaultModelValues.name_max_length)
     author = models.CharField(max_length=DefaultModelValues.author_max_length)
     link = models.URLField(max_length=DefaultModelValues.link_max_length)
-    time_limit = models.PositiveIntegerField(default=DefaultModelValues.time_limit_default)
-
+    time_limit = models.PositiveIntegerField(
+        default=DefaultModelValues.time_limit_default
+    )
 
     class Meta:
         verbose_name_plural = "Repositories"
