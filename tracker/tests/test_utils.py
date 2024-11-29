@@ -1,22 +1,23 @@
-import os
-
 import django
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings")
 django.setup()
 
 
 from asgiref.sync import async_to_sync
 from django.test import TestCase
+from faker import Faker
 
+from tracker.choices import Roles
 from tracker.models import CustomUser, Repository, TelegramUser
 from tracker.utils import get_all_repostitories
+
+fake = Faker()
 
 
 class TestGetAllRepositories(TestCase):
     def setUp(self):
         self.custom_user = CustomUser.objects.create(
-            email="testuser@example.com", role="CONTRIBUTOR"
+            email=fake.email, role=Roles.CONTRIBUTOR
         )
 
         self.user = TelegramUser.objects.create(
