@@ -3,7 +3,7 @@ from django.contrib.auth import login
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.views.generic import CreateView
-from django.views import View
+from django.views.generic.list import ListView
 from django.http import JsonResponse
 
 from .forms import SignUpForm
@@ -47,41 +47,50 @@ class CreateUserView(CreateView):
         return render(request, self.template_name, {"form": form})
 
 
-class ContributorListView(View):
+class ContributorListView(ListView):
     """
-    View to list contributors. Only project leads can view notes and rank
+    A view to list contributors with role-based data visibility.
     """
-    
-    def get(self, request, *args, **kwargs):
+
+    model = Contributor
+
+    def get_queryset(self):
         """
-        A GET request for this view.
-        :param request: HttpRequest
-        :param args: tuple
-        :param kwargs: dict
-        :return: JsonResponse
+        Customize the queryset based on the user's role.
+        Project leads can see notes and rank, while others cannot.
         """
-        user = request.user
-        contributors = Contributor.objects.all()
-        
+        user = self.request.user
+
+        if user.is_project_lead():
+            return Contributor.objects.all()
+        return Contributor.objects.all().only("id", "user", "role")
+
+    def render_to_response(self, context, **response_kwargs):
+        """
+        Customize the JSON response to include contributor data.
+        """
+        queryset = self.get_queryset()
+        user = self.request.user
+
         if user.is_project_lead():
             data = [
                 {
                     "id": contributor.id,
-                    "user": contributor.user.email,
+                    "user": contributor.user.telegramuser.telegram_id,
                     "role": contributor.role,
                     "notes": contributor.notes,
                     "rank": contributor.rank,
                 }
-                for contributor in contributors
+                for contributor in queryset
             ]
         else:
             data = [
                 {
                     "id": contributor.id,
-                    "user": contributor.user.email,
+                    "user": contributor.user.telegramuser.telegram_id,
                     "role": contributor.role,
                 }
-                for contributor in contributors
+                for contributor in queryset
             ]
-        
-        return JsonResponse(data, safe=False)
+
+        return JsonResponse(data, safe=False, **response_kwargs)
