@@ -349,15 +349,6 @@ def get_time_before_deadline(issue: dict) -> str:
 
     time_left = deadline_datetime - now
 
-    if assigned_at:
-        assigned_time = datetime.strptime(assigned_at, "%Y-%m-%dT%H:%M:%SZ").replace(
-            tzinfo=timezone.utc
-        )
-        time_delta = relativedelta(now, assigned_time)
-        issue["assigned_days"] = time_delta.days
-    else:
-        issue["assigned_days"] = 0
-
     if time_left.days > 0:
         return f"{time_left.days} days remaining"
     elif time_left.seconds > 0:
