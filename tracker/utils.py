@@ -1,10 +1,10 @@
 import logging
-from datetime import datetime
+from collections import defaultdict
+from datetime import datetime, timezone
 
 import requests
-from asgiref.sync import sync_to_async, async_to_sync
+from asgiref.sync import async_to_sync, sync_to_async
 from dateutil.relativedelta import relativedelta
-from collections import defaultdict
 
 from .values import HEADERS, PULLS_REVIEWS_URL, PULLS_URL
 
@@ -273,38 +273,43 @@ def get_user_revisions(telegram_id: str) -> list[dict]:
                 reviews_list.append(return_data.copy())
     return reviews_list
 
-def get_contributor_issues(username: str, is_state_open: bool, match_label: bool = False, regex: str = "") -> list:
+
+def get_contributor_issues(
+    username: str, is_state_open: bool, match_label: bool = False, regex: str = ""
+) -> list:
     """
     Retrieves all issues assigned to the github account matching the username.
     :param username: The username of the github account.
     :return: A list representing issues assigned.
     """
     try:
-        api_url = ISSUES_SEARCH.format(username = username)
+        api_url = ISSUES_SEARCH.format(username=username)
 
         response = requests.get(api_url, headers=HEADERS)
 
         response.raise_for_status()
 
-        issues = response.json().get('items', [])
+        issues = response.json().get("items", [])
         issues_format = []
         for issue in issues:
 
-            if is_state_open and issue.get('state') != 'open':
+            if is_state_open and issue.get("state") != "open":
                 continue
 
-            labels = [label.get('name') for label in issue.get('labels', [])]
+            labels = [label.get("name") for label in issue.get("labels", [])]
             for label in labels:
-                if not match_label or re.search(regex, label, re.IGNORECASE): 
+                if not match_label or re.search(regex, label, re.IGNORECASE):
                     issues_format.append(
-                        f"Issue: {issue.get('title')}: {issue.get('html_url')}")
-                    break   
+                        f"Issue: {issue.get('title')}: {issue.get('html_url')}"
+                    )
+                    break
 
         return issues_format
 
     except requests.exceptions.RequestException as e:
         logger.info(e)
     return []
+
 
 def attach_link_to_issue(issue_title: str, issue_link: str) -> str:
     """
@@ -317,3 +322,47 @@ def attach_link_to_issue(issue_title: str, issue_link: str) -> str:
     title = f'<a href="{issue_link}">{issue_title}</a>'
     return title
 
+
+def get_time_before_deadline(issue: dict) -> str:
+    """
+    Returns the time remaining before the deadline of an assigned issue.
+    If the issue has no assignee or deadline, returns appropriate messages.
+
+    :param issue: The issue dictionary containing information about the issue.
+    :return: Time remaining in a human-readable format.
+    """
+
+    assignment_info = check_issue_assignment_events(issue)
+    assigned_at = assignment_info.get("assigned_at")
+
+    if not assigned_at:
+        return "This issue is not assigned."
+
+    deadline_str = issue.get("due_on")
+    if not deadline_str:
+        return "No deadline set for this issue."
+
+    deadline_datetime = datetime.strptime(deadline_str, "%Y-%m-%dT%H:%M:%SZ").replace(
+        tzinfo=timezone.utc
+    )
+    now = datetime.now(timezone.utc)
+
+    time_left = deadline_datetime - now
+
+    if assigned_at:
+        assigned_time = datetime.strptime(assigned_at, "%Y-%m-%dT%H:%M:%SZ").replace(
+            tzinfo=timezone.utc
+        )
+        time_delta = relativedelta(now, assigned_time)
+        issue["assigned_days"] = time_delta.days
+    else:
+        issue["assigned_days"] = 0
+
+    if time_left.days > 0:
+        return f"{time_left.days} days remaining"
+    elif time_left.seconds > 0:
+        hours = time_left.seconds // 3600
+        minutes = (time_left.seconds % 3600) // 60
+        return f"{hours} hours {minutes} minutes remaining"
+    else:
+        return "Deadline has passed."
