@@ -13,6 +13,8 @@ from tracker.utils import get_all_repostitories
 
 fake = Faker()
 
+telagram_id = fake.random_int(min=100000000, max=9999999999)
+
 
 class TestGetAllRepositories(TestCase):
     def setUp(self):
@@ -21,7 +23,7 @@ class TestGetAllRepositories(TestCase):
         )
 
         self.user = TelegramUser.objects.create(
-            telegram_id="123456789", user_id=self.custom_user.id
+            telegram_id=telagram_id, user_id=self.custom_user.id
         )
 
         self.repo1 = Repository.objects.create(user=self.custom_user, name="TestRepo1")
@@ -29,7 +31,7 @@ class TestGetAllRepositories(TestCase):
 
     def test_get_all_repositories_valid_user(self):
         """Test valid telegram ID fetching repositories."""
-        result = async_to_sync(get_all_repostitories)(tele_id="123456789")
+        result = async_to_sync(get_all_repostitories)(tele_id=telagram_id)
         self.assertEqual(len(result), 2)
         self.assertEqual(result[0]["name"], "TestRepo1")
         self.assertEqual(result[1]["name"], "TestRepo2")
