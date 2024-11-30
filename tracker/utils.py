@@ -349,11 +349,12 @@ def get_time_before_deadline(issue: dict) -> str:
 
     time_left = deadline_datetime - now
 
-    if time_left.days > 0:
-        return f"{time_left.days} days remaining"
-    elif time_left.seconds > 0:
-        hours = time_left.seconds // 3600
-        minutes = (time_left.seconds % 3600) // 60
-        return f"{hours} hours {minutes} minutes remaining"
+    if time_left.total_seconds() > 0:
+        if time_left.days > 0:
+            return f"{time_left.days} days remaining"
+        else:
+            hours = time_left.seconds // 3600
+            minutes = (time_left.seconds % 3600) // 60
+            return f"{hours} hours {minutes} minutes remaining"
     else:
         return "Deadline has passed."
