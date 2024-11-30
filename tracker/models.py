@@ -4,6 +4,9 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.core.exceptions import ValidationError
 from django.db import models
 from django_celery_beat.models import IntervalSchedule, PeriodicTask
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
 
 from shared.models import AbstractModel
 from tracker.choices import Roles
@@ -257,3 +260,11 @@ class Contributor(AbstractModel):
         :return: str
         """
         return f"Contributor: {self.telegram_id} (Role: {self.role})"
+    
+@receiver(post_save, sender=CustomUser)
+def create_telegram_user(sender, instance, created, **kwargs):
+    """
+    Signal to create a TelegramUser instance when a new CustomUser is created.
+    """
+    if created:
+        TelegramUser.objects.get_or_create(user=instance, defaults={"telegram_id": f"default_{instance.id}"})
