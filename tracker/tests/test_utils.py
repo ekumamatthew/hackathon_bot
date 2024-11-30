@@ -1,7 +1,4 @@
-import os
 import django
-
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 
 django.setup()
 
@@ -12,7 +9,6 @@ from faker import Faker
 from tracker.choices import Roles
 from tracker.models import CustomUser, Repository, TelegramUser
 from tracker.utils import get_all_repostitories, get_user
-from uuid import UUID
 
 fake = Faker()
 
