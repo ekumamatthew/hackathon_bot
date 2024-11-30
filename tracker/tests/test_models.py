@@ -47,3 +47,15 @@ class TestCustomUserManager(TestCase):
         self.assertTrue(superuser.check_password(self.password))
         self.assertTrue(superuser.is_staff)
 
+    def test_create_user_with_invalid_email(self):
+        """Test creating a user with invalid email format."""
+        invalid_email = "invalid.email@format"
+        
+        with self.assertRaises(ValueError) as context:
+            CustomUser.objects.create_user(
+                email=invalid_email,
+                password=self.password,
+                role=self.role
+            )
+        
+        self.assertEqual(str(context.exception), "Invalid email format")
