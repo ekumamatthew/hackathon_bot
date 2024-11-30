@@ -122,9 +122,10 @@ class CustomUser(AbstractModel, AbstractBaseUser):
         """
         return self.is_admin
     
-    def is_project_lead(self):
+    def is_project_lead(self) -> bool:
         """
         Checks if the user is a project lead
+        :return: bool
         """
         return self.role == Roles.PROJECT_LEAD
 
