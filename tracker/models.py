@@ -39,7 +39,6 @@ class CustomUserManager(BaseUserManager):
         if not role:
             role = Roles.CONTRIBUTOR
        
-
         user = self.model(
             email=self.normalize_email(email),
             password=password,
