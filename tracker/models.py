@@ -267,10 +267,10 @@ class Contributor(AbstractModel):
     
     def __str__(self):
         """
-        Returns a string representation of the contributor, which is the telegram_id and role.
-        :return: str
+        Returns a string representation of the contributor, including the telegram_id from the related TelegramUser.
         """
-        return f"Contributor: {self.telegram_id} (Role: {self.role})"
+        telegram_id = self.user.telegramuser.telegram_id if hasattr(self.user, 'telegramuser') else "No Telegram ID"
+        return f"Contributor: {telegram_id} (Role: {self.role})"
     
 @receiver(post_save, sender=CustomUser)
 def create_telegram_user(sender, instance, created, **kwargs):
