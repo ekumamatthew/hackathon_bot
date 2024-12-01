@@ -1,6 +1,6 @@
 import logging
 from collections import defaultdict
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import requests
 from asgiref.sync import async_to_sync, sync_to_async
@@ -323,6 +323,14 @@ def attach_link_to_issue(issue_title: str, issue_link: str) -> str:
     return title
 
 
+def get_repository_from_issue(issue: dict) -> dict:
+    repository_url = issue.get("repository_url", "")
+    if repository_url:
+        parts = repository_url.rstrip("/").split("/")
+        return {"author": parts[-2], "name": parts[-1]}
+    return {}
+
+
 def get_time_before_deadline(issue: dict) -> str:
     """
     Returns the time remaining before the deadline of an assigned issue.
@@ -338,24 +346,25 @@ def get_time_before_deadline(issue: dict) -> str:
     if not assigned_at:
         return "This issue is not assigned."
 
-    deadline_str = issue.get("due_on")
-    if not deadline_str:
-        return "No deadline set for this issue."
+    repository_details = get_repository_from_issue(issue)
+    if not repository_details:
+        return "Repository details not found."
 
-    deadline_datetime = datetime.strptime(deadline_str, "%Y-%m-%dT%H:%M:%SZ").replace(
+    from .models import Repository
+
+    repo = Repository.objects.get(
+        author=repository_details["author"], name=repository_details["name"]
+    )
+    time_limit_seconds = repo.time_limit
+
+    assigned_time = datetime.strptime(assigned_at, "%Y-%m-%dT%H:%M:%SZ").replace(
         tzinfo=timezone.utc
     )
+    deadline_datetime = assigned_time + timedelta(seconds=time_limit_seconds)
     now = datetime.now(timezone.utc)
-    time_diff = relativedelta(deadline_datetime, now)
 
     if deadline_datetime > now:
-        if time_diff.days > 0:
-            return f"{time_diff.days} days remaining"
-        elif time_diff.hours > 0 or time_diff.minutes > 0:
-            hours = time_diff.hours
-            minutes = time_diff.minutes
-            return f"{hours} hours {minutes} minutes remaining"
-        else:
-            return "Less than a minute remaining"
-    else:  # Deadline has passed
+        remaining_time = deadline_datetime - now
+        return f"Time remaining: {remaining_time.days} days, {remaining_time.seconds // 3600} hours"
+    else:
         return "Deadline has passed."
