@@ -6,7 +6,13 @@ import requests
 from asgiref.sync import async_to_sync, sync_to_async
 from dateutil.relativedelta import relativedelta
 
-from .values import HEADERS, PULLS_REVIEWS_URL, PULLS_URL
+from .values import (
+    DATETIME_FORMAT,
+    HEADERS,
+    PULLS_REVIEWS_URL,
+    PULLS_URL,
+    SECONDS_IN_AN_HOUR,
+)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -15,21 +21,17 @@ logger.setLevel(logging.INFO)
 @sync_to_async
 def get_all_repostitories(tele_id: str) -> list[dict]:
     """
-    A function that returns a list of repositories asynchronously.
-    Handles cases where the TelegramUser does not exist.
-
+    A function that returns a list of repositories asyncronously.
     :param tele_id: str
-    :return: List of repositories
+    :return: Repositories
     """
     from .models import TelegramUser
 
-    try:
-        repositories = TelegramUser.objects.get(
-            telegram_id=tele_id
-        ).user.repository_set.values()
-        return list(repositories)
-    except TelegramUser.DoesNotExist:
-        return []
+    repositories = TelegramUser.objects.get(
+        telegram_id=tele_id
+    ).user.repository_set.values()
+
+    return list(repositories)
 
 
 @sync_to_async
@@ -357,11 +359,11 @@ def get_time_before_deadline(issue: dict) -> str:
     from .models import Repository
 
     repo = Repository.objects.get(
-        author=repository_details["author"], name=repository_details["name"]
+        author=repository_details.get("author"), name=repository_details.get("name")
     )
     time_limit_seconds = repo.time_limit
 
-    assigned_time = datetime.strptime(assigned_at, "%Y-%m-%dT%H:%M:%SZ").replace(
+    assigned_time = datetime.strptime(assigned_at, DATETIME_FORMAT).replace(
         tzinfo=timezone.utc
     )
     deadline_datetime = assigned_time + timedelta(seconds=time_limit_seconds)
@@ -369,6 +371,6 @@ def get_time_before_deadline(issue: dict) -> str:
 
     if deadline_datetime > now:
         remaining_time = deadline_datetime - now
-        return f"Time remaining: {remaining_time.days} days, {remaining_time.seconds // 3600} hours"
+        return f"Time remaining: {remaining_time.days} days, {remaining_time.seconds // SECONDS_IN_AN_HOUR} hours"
     else:
         return "Deadline has passed."
