@@ -346,15 +346,16 @@ def get_time_before_deadline(issue: dict) -> str:
         tzinfo=timezone.utc
     )
     now = datetime.now(timezone.utc)
+    time_diff = relativedelta(deadline_datetime, now)
 
-    time_left = deadline_datetime - now
-
-    if time_left.total_seconds() > 0:
-        if time_left.days > 0:
-            return f"{time_left.days} days remaining"
-        else:
-            hours = time_left.seconds // 3600
-            minutes = (time_left.seconds % 3600) // 60
+    if deadline_datetime > now:
+        if time_diff.days > 0:
+            return f"{time_diff.days} days remaining"
+        elif time_diff.hours > 0 or time_diff.minutes > 0:
+            hours = time_diff.hours
+            minutes = time_diff.minutes
             return f"{hours} hours {minutes} minutes remaining"
-    else:
+        else:
+            return "Less than a minute remaining"
+    else:  # Deadline has passed
         return "Deadline has passed."
